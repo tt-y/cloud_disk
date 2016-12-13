@@ -4,13 +4,18 @@
 #include <sys/wait.h>
 #include "make_log.h"
 
+#define FILE_ID_LEN 256
+
+#define LOG_TEST_MODULE "test"
+#define LOG_TEST_PROC "fdfs"
+
 int main(int argc, char *argv[])
 {
 	int ret = 0;
 	int fd[2];//0为读端,1为写端
 	pid_t pid;
 	pid_t wpid;
-	char buf[64];
+	char file_id[FILE_ID_LEN] = {0};
 	if(argc != 2)
 	{
 		printf("./main <local_filename>\n");
@@ -35,12 +40,12 @@ int main(int argc, char *argv[])
 	{
 		//关闭写端
 		close(fd[1]);
-		//读管道
-		read(fd[0], buf, sizeof(buf));
-		//打log
-		dumpmsg_to_file("fdfs", "upload_file", __FILE__, __LINE__, __FUNCTION__, "%s", buf);
 		//回收子进程
 		while((wpid = waitpid(-1, NULL, WNOHANG)) != -1){}
+		//读管道
+		read(fd[0], file_id, FILE_ID_LEN);
+		//打log
+		LOG(LOG_TEST_MODULE, LOG_TEST_PROC, __FILE__, __LINE__, __FUNCTION__, "[file_id]:%s", file_id);
 		printf("log ok\n");
 	}
 	//子进程

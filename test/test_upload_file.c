@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 		//读管道
 		read(fd[0], file_id, FILE_ID_LEN);
 		//打log
-		LOG(LOG_TEST_MODULE, LOG_TEST_PROC, __FILE__, __LINE__, __FUNCTION__, "[file_id]:%s", file_id);
+		LOG(LOG_TEST_MODULE, LOG_TEST_PROC, "file_id=[%s]", file_id);
 		printf("log ok\n");
 	}
 	//子进程

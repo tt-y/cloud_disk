@@ -1058,7 +1058,8 @@ int rop_get_string(redisContext *conn, const char *key, char *value)
 		retn = -1;
 		goto END;
 	}
-	strcpy(value, reply->str);
+	strncpy(value, reply->str, reply->len);
+	value[reply->len] = '\0';
 
 END:
 	freeReplyObject(reply);

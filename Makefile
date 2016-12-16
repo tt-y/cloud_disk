@@ -6,18 +6,17 @@ VPATH=$(WORKDIR)/src
 
 INCLFLAG=-I$(INCLDIR)
 CFLAG=$(INCLFLAG) -c -g -Wall
+LIBFLAG=-lfcgi
 
-all:main
+all:upload_cgi
 
-OBJ=main.o make_log.o
-
-main:$(OBJ)
-	$(CC) $^ -o $@
+upload_cgi:upload_cgi.o
+	$(CC) $^ -o $@ $(LIBFLAG)
 	
 .c.o:
-	$(CC) $(CFLAG) $<
+	$(CC) $< $(CFLAG)
 
 .PHONY:all clean
 
 clean:
-	-rm -f *.o main
+	-rm -f *.o upload_cgi

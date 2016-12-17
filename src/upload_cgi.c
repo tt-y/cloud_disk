@@ -9,7 +9,7 @@
 #ifdef _WIN32
 #include <process.h>
 #else
-extern char **environ;
+//extern char **environ;
 #endif
 
 #include "fcgi_stdio.h"
@@ -47,6 +47,7 @@ char* memstr(char* full_data, int full_data_len, char* substr)
 	return NULL; 
 } 
 
+/*
 static void PrintEnv(char *label, char **envp)
 {
 	printf("%s:<br>\n<pre>\n", label);
@@ -55,11 +56,18 @@ static void PrintEnv(char *label, char **envp)
 	}
 	printf("</pre><p>\n");
 }
+*/
 
 int main ()
 {
-	char **initialEnv = environ;
+	//char **initialEnv = environ;
 	int count = 0;
+	char *buf = NULL;
+	char *p = NULL;
+	char *q = NULL;
+	char line[128] = {0};
+	char fileName[128] = {0};
+	int fileLength = 0;
 
 	while (FCGI_Accept() >= 0) {
 		char *contentLength = getenv("CONTENT_LENGTH");
@@ -83,20 +91,45 @@ int main ()
 		}
 		else {
 			int i, ch;
+			//开辟空间存储post的数据
+			buf = malloc(len);
 
 			printf("Standard input:<br>\n<pre>\n");
+
 			for (i = 0; i < len; i++) {
 				if ((ch = getchar()) < 0) {
 					printf("Error: Not enough bytes received on standard input<p>\n");
 					break;
 				}
-				putchar(ch);
+				buf[i] = ch;
+				//putchar(ch);
 			}
+			//printf("%s", buf);
+
+			//解析数据
+			p = buf;
+			q = buf;
+			//获得协议头
+			q = strstr(p, "\r\n");
+			strncpy(line, p, q - p);
+			printf("line:%s\n", line);
+			//获得文件名
+			p = strstr(q + 2, "filename=") + strlen("filename=");
+			q = strstr(p, "\r\n");
+			strncpy(fileName, p, q - p);
+			printf("fileName:%s\n", fileName);
+			//获得文件数据大小
+			p = strstr(q + 2, "\r\n");
+			p = strstr(p + 2, "\r\n") + 2;
+			q = memstr(p, len - (p - buf), line);
+			fileLength = q - 2 - p;
+			printf("fileLength:%d\n", fileLength);
+
 			printf("\n</pre><p>\n");
 		}
 
-		PrintEnv("Request environment", environ);
-		PrintEnv("Initial environment", initialEnv);
+		//PrintEnv("Request environment", environ);
+		//PrintEnv("Initial environment", initialEnv);
 	} /* while */
 
 	return 0;
